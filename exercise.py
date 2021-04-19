@@ -79,7 +79,11 @@ def neighbours_matrix_v(grid: np.ndarray) -> np.array:
 
     """
     assert (grid[[0, -1], :] == 0).all() and (grid[:, [0, -1]] == 0).all()
-    pass # TODO write your vectorized version
+    ris = np.zeros_like(grid)
+    ris[1:-1, 1:-1] = grid[2:,1:-1] + grid[2:,2:] + grid[1:-1,2:] + \
+                      grid[:-2,2:] + grid[:-2,1:-1] + grid[:-2,:-2] + \
+                      grid[1:-1,:-2] + grid[2:,:-2]
+    return ris
 
 def new_generation(grid: np.ndarray) -> np.array:
     """Compute new generation.
@@ -122,13 +126,23 @@ def new_generation_v(grid: np.ndarray) -> np.array:
     True
     """
     assert (grid[[0, -1], :] == 0).all() and (grid[:, [0, -1]] == 0).all()
-    pass # TODO Write here your vectorized version
+    ris = grid.copy()
+    neighs = neighbours_matrix_v(grid)
+
+    # overpopulation
+    ris[(grid == 1) & (neighs > 3)] = 0
+    # underpopulation
+    ris[(grid == 1) & (neighs < 2)] = 0
+    # reproduction
+    ris[(grid == 0) & (neighs == 3)] = 1
+    return ris
+
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt # type: ignore
     from matplotlib.animation import FuncAnimation # type: ignore
 
-    SIZE = 10 # TODO Try to change this to 1000 when you are ready
+    SIZE = 1000
 
     rng = np.random.default_rng(seed=42)
     G = rng.integers(0, 2, size=(SIZE,2*SIZE))
