@@ -9,9 +9,9 @@
       },
       {
           "name": "doctest",
-          "setup": "",
+          "setup": "python3 -m pip install -r requirements.txt",
           "run": "python3 -m doctest exercise.py",
-          "timeout": 10,
+          "timeout": 60,
           "points": null
     }
   ]
