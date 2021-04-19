@@ -1,0 +1,18 @@
+{
+  "tests": [
+      {
+          "name": "types",
+          "setup": "python3 -m pip install mypy",
+          "run": "mypy exercise.py",
+          "timeout": 10,
+          "points": null
+      },
+      {
+          "name": "doctest",
+          "setup": "",
+          "run": "python3 -m doctest exercise.py",
+          "timeout": 10,
+          "points": null
+    }
+  ]
+}
