@@ -128,4 +128,5 @@ dmypy.json
 # Pyre type checker
 .pyre/
 *.ipynb
-solved.mp4
+Pipfile*
+*.mp4
