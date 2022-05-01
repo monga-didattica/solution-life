@@ -1,4 +1,5 @@
-import numpy as np # type: ignore
+import numpy as np
+
 
 def zero_border(grid: np.ndarray) -> np.ndarray:
     """Change the grid such that the border is all zeroes.
@@ -43,7 +44,8 @@ def neighbours_count(grid: np.ndarray, x: int, y: int) -> int:
                 ris = ris + grid[x+dx, y+dy]
     return ris
 
-def neighbours_matrix(grid: np.ndarray) -> np.array:
+
+def neighbours_matrix(grid: np.ndarray) -> np.ndarray:
     """Compute the matrix of neighbours.
 
     >>> g = np.array([[0,0,0,0,0,0],
@@ -68,7 +70,8 @@ def neighbours_matrix(grid: np.ndarray) -> np.array:
             ris[i, j] = neighbours_count(grid, i, j)
     return ris
 
-def neighbours_matrix_v(grid: np.ndarray) -> np.array:
+
+def neighbours_matrix_v(grid: np.ndarray) -> np.ndarray:
     """Compute the matrix of neighbours without using loops.
 
     >>> rng = np.random.default_rng(seed=42)
@@ -85,7 +88,8 @@ def neighbours_matrix_v(grid: np.ndarray) -> np.array:
                       grid[1:-1,:-2] + grid[2:,:-2]
     return ris
 
-def new_generation(grid: np.ndarray) -> np.array:
+
+def new_generation(grid: np.ndarray) -> np.ndarray:
     """Compute new generation.
 
     >>> g = np.array([[0,0,0,0,0,0],
@@ -116,7 +120,8 @@ def new_generation(grid: np.ndarray) -> np.array:
                     ris[i, j] = 1
     return ris
 
-def new_generation_v(grid: np.ndarray) -> np.array:
+
+def new_generation_v(grid: np.ndarray) -> np.ndarray:
     """Compute new generation without using loops.
 
     >>> rng = np.random.default_rng(seed=42)
@@ -138,31 +143,45 @@ def new_generation_v(grid: np.ndarray) -> np.array:
     return ris
 
 
-if __name__ == '__main__':
-    import matplotlib.pyplot as plt # type: ignore
-    from matplotlib.animation import FuncAnimation # type: ignore
+import matplotlib.pyplot as plt  # type: ignore
 
-    SIZE = 1000
+SIZE = 10
+rng = np.random.default_rng(seed=42)
+G = rng.integers(0, 2, size=(SIZE,2*SIZE))
+G = zero_border(G)
 
-    rng = np.random.default_rng(seed=42)
-    G = rng.integers(0, 2, size=(SIZE,2*SIZE))
-    G = zero_border(G)
+fig, ax = plt.subplots()
+ax.imshow(G, cmap=plt.cm.gray_r, vmin=0, vmax=1)
+ax.set_xticks([])
+_ = ax.set_yticks([])
+
+fig, ax = plt.subplots()
+im = ax.imshow(new_generation(G), cmap=plt.cm.gray_r, vmin=0, vmax=1)
+ax.set_xticks([])
+_ = ax.set_yticks([])
+
+from matplotlib.animation import FuncAnimation # type: ignore
 
 
-    fig, ax = plt.subplots()
-    im = ax.imshow(G, cmap=plt.cm.gray_r, vmin=0, vmax=1)
-    plt.xticks([])
-    plt.yticks([])
+class Life:
+    def __init__(self, grid: np.ndarray):
+        self.grid = grid
+        self.fig, self.ax = plt.subplots()
+        self.im = self.ax.imshow(G, cmap=plt.cm.gray_r, vmin=0, vmax=1)
+        self.ax.set_xticks([])
+        self.ax.set_yticks([])
 
-    def update(frame: int) -> None:
-        global G, im
-        if SIZE >= 1000:
-            G = new_generation_v(G)
-        else:
-            G = new_generation(G)
-        im.set_data(G)
+    def update(self, frame: int):
+        self.grid = new_generation_v(self.grid)
+        self.im.set_data(self.grid)
+        return self.im
 
-    animation = FuncAnimation(fig, update, frames=1000)
-    if SIZE >= 1000:
-        animation.save('solved.mp4')
-    plt.show()
+    def animate(self):
+        self.animation = FuncAnimation(self.fig, self.update, frames=100)
+
+
+life = Life(G)
+life.animate()
+
+from IPython.display import HTML  # type: ignore
+HTML(life.animation.to_html5_video())
