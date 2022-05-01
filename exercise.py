@@ -184,4 +184,4 @@ life = Life(G)
 life.animate()
 
 from IPython.display import HTML  # type: ignore
-HTML(life.animation.to_html5_video())
+HTML(life.animation.to_jshtml())
