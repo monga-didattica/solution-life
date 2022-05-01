@@ -13,6 +13,7 @@ defusedxml==0.7.1
 entrypoints==0.4
 executing==0.8.3
 fastjsonschema==2.15.3
+ffmpeg==1.4
 fonttools==4.33.3
 ipykernel==6.13.0
 ipython==8.3.0
@@ -46,6 +47,7 @@ parso==0.8.3
 pexpect==4.8.0
 pickleshare==0.7.5
 Pillow==9.1.0
+pip==22.0.4
 prometheus-client==0.14.1
 prompt-toolkit==3.0.29
 psutil==5.9.0
@@ -59,6 +61,7 @@ python-dateutil==2.8.2
 PyYAML==6.0
 pyzmq==22.3.0
 Send2Trash==1.8.0
+setuptools==62.1.0
 six==1.16.0
 soupsieve==2.3.2.post1
 stack-data==0.2.0
@@ -71,3 +74,4 @@ traitlets==5.1.1
 typing_extensions==4.2.0
 wcwidth==0.2.5
 webencodings==0.5.1
+wheel==0.37.1
