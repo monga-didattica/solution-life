@@ -16,23 +16,23 @@ def zero_border(grid: np.ndarray) -> np.ndarray:
     return ris
 
 
-def neighbours_count(grid: np.ndarray, x: int, y: int) -> int:
+def neighbour_count(grid: np.ndarray, x: int, y: int) -> int:
     """Compute the number of alive neighbours.
 
     >>> g = np.ones((5,5), dtype=int)
     >>> g = zero_border(g)
-    >>> neighbours_count(g, 2, 2)
+    >>> neighbour_count(g, 2, 2)
     8
 
     >>> g = np.zeros((5,5), dtype=int)
-    >>> neighbours_count(g, 2, 2)
+    >>> neighbour_count(g, 2, 2)
     0
 
     >>> g = np.array([[0,0,0,0],
     ...               [0,1,1,0],
     ...               [0,0,1,0],
     ...               [0,0,0,0]], dtype=int)
-    >>> neighbours_count(g, 2, 2)
+    >>> neighbour_count(g, 2, 2)
     2
 
     """
@@ -45,7 +45,7 @@ def neighbours_count(grid: np.ndarray, x: int, y: int) -> int:
     return ris
 
 
-def neighbours_matrix(grid: np.ndarray) -> np.ndarray:
+def neighbour_matrix(grid: np.ndarray) -> np.ndarray:
     """Compute the matrix of neighbours.
 
     >>> g = np.array([[0,0,0,0,0,0],
@@ -54,7 +54,7 @@ def neighbours_matrix(grid: np.ndarray) -> np.ndarray:
     ...               [0,1,1,1,0,0],
     ...               [0,0,0,0,0,0],
     ...               [0,0,0,0,0,0]], dtype=int)
-    >>> neighbours_matrix(g)
+    >>> neighbour_matrix(g)
     array([[0, 0, 0, 0, 0, 0],
            [0, 1, 1, 2, 1, 0],
            [0, 3, 5, 3, 2, 0],
@@ -67,25 +67,25 @@ def neighbours_matrix(grid: np.ndarray) -> np.ndarray:
     ris = np.zeros_like(grid)
     for i in range(1, grid.shape[0]-1):
         for j in range(1, grid.shape[1]-1):
-            ris[i, j] = neighbours_count(grid, i, j)
+            ris[i, j] = neighbour_count(grid, i, j)
     return ris
 
 
-def neighbours_matrix_v(grid: np.ndarray) -> np.ndarray:
+def neighbour_matrix_v(grid: np.ndarray) -> np.ndarray:
     """Compute the matrix of neighbours without using loops.
 
     >>> rng = np.random.default_rng(seed=42)
     >>> g = rng.integers(0, 2, size=(10,20))
     >>> g = zero_border(g)
-    >>> (neighbours_matrix_v(g) == neighbours_matrix(g)).all()
+    >>> (neighbour_matrix_v(g) == neighbour_matrix(g)).all()
     True
 
     """
     assert (grid[[0, -1], :] == 0).all() and (grid[:, [0, -1]] == 0).all()
     ris = np.zeros_like(grid)
-    ris[1:-1, 1:-1] = grid[2:,1:-1] + grid[2:,2:] + grid[1:-1,2:] + \
-                      grid[:-2,2:] + grid[:-2,1:-1] + grid[:-2,:-2] + \
-                      grid[1:-1,:-2] + grid[2:,:-2]
+    ris[1:-1, 1:-1] = (grid[2:, 1:-1] + grid[2:, 2:] + grid[1:-1, 2:] +
+                       grid[:-2, 2:] + grid[:-2, 1:-1] + grid[:-2, :-2] +
+                       grid[1:-1, :-2] + grid[2:, :-2])
     return ris
 
 
@@ -109,7 +109,7 @@ def new_generation(grid: np.ndarray) -> np.ndarray:
     """
     assert (grid[[0, -1], :] == 0).all() and (grid[:, [0, -1]] == 0).all()
     ris = grid.copy()
-    neighs = neighbours_matrix(grid)
+    neighs = neighbour_matrix(grid)
     for i in range(1, grid.shape[0]-1):
         for j in range(1, grid.shape[1]-1):
             if grid[i, j] == 1:
@@ -132,7 +132,7 @@ def new_generation_v(grid: np.ndarray) -> np.ndarray:
     """
     assert (grid[[0, -1], :] == 0).all() and (grid[:, [0, -1]] == 0).all()
     ris = grid.copy()
-    neighs = neighbours_matrix_v(grid)
+    neighs = neighbour_matrix_v(grid)
 
     # overpopulation
     ris[(grid == 1) & (neighs > 3)] = 0
@@ -145,7 +145,7 @@ def new_generation_v(grid: np.ndarray) -> np.ndarray:
 
 import matplotlib.pyplot as plt  # type: ignore
 
-SIZE = 10
+SIZE = 50
 rng = np.random.default_rng(seed=42)
 G = rng.integers(0, 2, size=(SIZE,2*SIZE))
 G = zero_border(G)
@@ -160,28 +160,27 @@ im = ax.imshow(new_generation(G), cmap=plt.cm.gray_r, vmin=0, vmax=1)
 ax.set_xticks([])
 _ = ax.set_yticks([])
 
-from matplotlib.animation import FuncAnimation # type: ignore
+from matplotlib.animation import FuncAnimation  # type: ignore
 
 
 class Life:
     def __init__(self, grid: np.ndarray):
         self.grid = grid
-        self.fig, self.ax = plt.subplots()
-        self.im = self.ax.imshow(G, cmap=plt.cm.gray_r, vmin=0, vmax=1)
-        self.ax.set_xticks([])
-        self.ax.set_yticks([])
+        self.fig, ax = plt.subplots()
+        self.im = ax.imshow(self.grid, cmap=plt.cm.gray_r, vmin=0, vmax=1)
+        ax.set_xticks([])
+        ax.set_yticks([])
 
     def update(self, frame: int):
         self.grid = new_generation_v(self.grid)
         self.im.set_data(self.grid)
-        return self.im
 
-    def animate(self):
-        self.animation = FuncAnimation(self.fig, self.update, frames=100)
+    def animate(self, frames: int):
+        self.animation = FuncAnimation(self.fig, self.update, frames=frames)
 
 
 life = Life(G)
-life.animate()
+life.animate(100)
 
 from IPython.display import HTML  # type: ignore
 HTML(life.animation.to_jshtml())
